@@ -1,0 +1,95 @@
+{
+ "round3-cost": {
+  "note": "5x2 重复；small=200行/14832字符（不裁剪），large=2400行/183186字符（裁剪）；标准答案 small=28 large=342",
+  "small": {
+   "sessions": [
+    "8d993d13-9497-40f0-a4a7-78fc40fcd144",
+    "ceec90b4-6949-4db6-81f0-98d19cdd2b8f",
+    "00c6d0b0-ca6b-4318-abe6-5c0a71d4be43",
+    "9309f05a-db2c-40b6-bc6e-f99722d62956",
+    "6b24b6b8-07f3-446c-9cab-03559f40f40c"
+   ],
+   "requests": [
+    5,
+    4,
+    6,
+    5,
+    5
+   ],
+   "uncached": [
+    1649,
+    1477,
+    2007,
+    1693,
+    1774
+   ],
+   "cacheRead": [
+    57088,
+    44928,
+    69248,
+    56832,
+    56960
+   ],
+   "answers": [
+    "28",
+    "28",
+    "28",
+    "28",
+    "28"
+   ]
+  },
+  "large": {
+   "sessions": [
+    "ad8c4c58-db37-411e-830e-a6f1b35c35a8",
+    "ade5e6fc-5943-4f1c-8d20-4d48660a4771",
+    "acf995f1-fb54-48cb-830c-098c35a1f6ab",
+    "b1311f69-20e7-4cc2-8ef5-76bce968bc24",
+    "8025dc62-d113-4115-8303-243cee301710"
+   ],
+   "requests": [
+    6,
+    5,
+    5,
+    5,
+    5
+   ],
+   "uncached": [
+    1532,
+    1342,
+    1452,
+    1037,
+    1001
+   ],
+   "cacheRead": [
+    69504,
+    56320,
+    56704,
+    56832,
+    56064
+   ],
+   "answers": [
+    "342",
+    "342",
+    "342",
+    "342",
+    "342"
+   ]
+  },
+  "means": {
+   "small": {
+    "requests": 5.0,
+    "uncached": 1720,
+    "cacheRead": 57011,
+    "uncachedPerRequest": 344,
+    "cost": 0.00286
+   },
+   "large": {
+    "requests": 5.2,
+    "uncached": 1273,
+    "cacheRead": 59085,
+    "uncachedPerRequest": 245,
+    "cost": 0.00245
+   }
+  }
+ }
+}

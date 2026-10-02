@@ -1,0 +1,15 @@
+# 依赖与产物
+node_modules/
+*.tgz
+pnpm-lock.yaml
+
+# 实验与语料（体积大、且是“本机数据”，不入库）
+.corpus/
+.ab-fixtures/
+.ab-run/
+.cost-ab/
+*.jsonl
+*.jsonl.zstd
+
+# 系统文件
+.DS_Store

@@ -1,0 +1,55 @@
+{
+  "name": "dsh-tool-token-optimizer",
+  "version": "1.0.13",
+  "private": true,
+  "type": "module",
+  "description": "把工具调用联动的 token 消耗压到最低，同时保证读到的结果信息量不变：结果落盘前做无损规范化，超预算时保留头 + 尾 + 全部报错行并给出精确取回路径。",
+  "keywords": [
+    "dsh",
+    "dsh-plugin",
+    "deepseek-harness",
+    "token",
+    "tool-result",
+    "context",
+    "cache"
+  ],
+  "license": "MIT",
+  "main": "lib/index.js",
+  "exports": {
+    ".": "./lib/index.js",
+    "./tokens": "./lib/tokens.js",
+    "./text": "./lib/text.js",
+    "./retain": "./lib/retain.js",
+    "./policy": "./lib/policy.js",
+    "./message": "./lib/message.js",
+    "./replay-core": "./lib/replay-core.js",
+    "./package.json": "./package.json",
+    "./cordis.patch.yml": "./cordis.patch.yml",
+    "./docs/*": "./docs/*"
+  },
+  "files": [
+    "lib",
+    "tools",
+    "test",
+    "docs",
+    "cordis.patch.yml",
+    "README.md"
+  ],
+  "scripts": {
+    "test": "node --test \"test/*.test.js\"",
+    "test:unit": "node --test \"test/text.test.js\" \"test/retain.test.js\" \"test/plugin.test.js\" \"test/tokens.test.js\"",
+    "replay": "node tools/replay.mjs",
+    "sweep": "node tools/sweep2.mjs",
+    "surface": "node tools/replay-surface.mjs",
+    "pack": "pnpm pack"
+  },
+  "meta": {
+    "title": "工具结果省量 Tool Result Optimizer",
+    "description": "工具结果落盘前压缩：无损规范化 + 头尾与报错行保留 + 精确取回路径；实测在 2596 条真实结果上省 62.8% 的工具结果 token。"
+  },
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    }
+  }
+}

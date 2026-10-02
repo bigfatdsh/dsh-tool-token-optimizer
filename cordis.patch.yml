@@ -1,0 +1,30 @@
+# dsh-tool-token-optimizer bundle 补丁。
+#
+# 本文件只插入一行：把「工具结果省量」插件挂到 Host 根部。
+#
+# 为什么挂在根、而不是某个 preset 里：
+#   * `tools/post-execute` 是 agent 作用域上的 waterfall，监听器按“越靠近根越先执行”
+#     排序；挂在根 + prepend 让它成为最外层，因此 `await next()` 之后看到的是**所有**
+#     下游转换器（官方 spill-policy、fs-search 的溢出替换等）处理完的最终内容，
+#     不会与它们互相覆盖。
+#   * 挂在根意味着一份监听器服务所有 preset，行为一致，也便于统一观测。
+#
+# 这一行不改变任何工具、任何提示词、任何模型选择：它只改「结果落盘后有多大」。
+
+- insert:
+    - id: tool-token-optimizer
+      name: 'dsh-tool-token-optimizer'
+      config:
+        # 单条结果的文本内联预算（字符）。实测默认值：2596 条真实结果上省 62.8%，
+        # 只改动其中 26% 的结果；按会话看，中位数会话省 62.7%。
+        inlineChars: 1600
+        # 可疑行（错误/失败/警告/堆栈）预算占比；实际额度不低于 400 字符。
+        importantBudgetRatio: 0.4
+        # 被裁剪时头部/尾部的占比：尾部留下结论、报错与 DSH 自己的可恢复路径。
+        headRatio: 0.55
+        tailRatio: 0.35
+        # 需要更宽松预算的工具可以在这里单独覆盖，例如：
+        #   toolBudgets: { read: 4000 }
+        toolBudgets: {}
+        logSavings: false
+        # 其它可用键：triggerRatio / minTailChars / skipTools
