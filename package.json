@@ -1,6 +1,6 @@
 {
   "name": "dsh-tool-token-optimizer",
-  "version": "1.0.13",
+  "version": "1.0.14",
   "private": true,
   "type": "module",
   "description": "把工具调用联动的 token 消耗压到最低，同时保证读到的结果信息量不变：结果落盘前做无损规范化，超预算时保留头 + 尾 + 全部报错行并给出精确取回路径。",

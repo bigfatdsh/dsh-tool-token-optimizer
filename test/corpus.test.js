@@ -146,6 +146,7 @@ test('真实语料：被裁剪的结果绝不切进行中间（保留部分都�
   const rows = loadRows(corpusDir);
   let checked = 0;
   let hardCut = 0;
+  let clippedLines = 0;
   for (const row of rows) {
     if (row.isError || row.text.length === 0) continue;
     const result = optimizeResult({ tool: row.tool, content: row.content, isError: row.isError }, OPTIONS);
@@ -156,7 +157,11 @@ test('真实语料：被裁剪的结果绝不切进行中间（保留部分都�
     const at = lines.findIndex((line) => line.includes('[…] omitted'));
     assert.ok(at > 0, `${row.tool}: 必须有说明行`);
     // 头部末行与尾部首行都必须是原文里逐字存在的完整行。
-    // 唯一允许的例外：原文里那一行本身就超长（没有行结构可切），此时按窗口硬切。
+    //
+    // 允许的例外只有两种，且都必须是**被明确标注**的退化：
+    //   a) 整个结果没有行结构（单行块）——没有"完整行"可言；
+    //   b) 那一行**自己就超过给它分配的预算**，此时按字符截断并在行尾留下
+    //      `…[line clipped]` 标记。绝不静默地把一行切一半。
     const headLine = lines[at - 1];
     const tailLine = at + 1 < lines.length ? lines[at + 1] : null;
     const singleLineBlock = !row.text.includes('\n');
@@ -168,21 +173,28 @@ test('真实语料：被裁剪的结果绝不切进行中间（保留部分都�
     // 也会把裸 `\r`（终端覆盖写）规范化，拿原始字节比对必然误报。
     const lossless = compactText(row.text, { enableJsonBreak: false });
     const normalizedOriginal = lossless.changed ? lossless.text : stripTrailingSpaces(normalizeNewlines(row.text));
+    const clippedHead = headLine.includes('[line clipped]');
+    if (clippedHead) clippedLines += 1;
     assert.equal(
-      normalizedOriginal.includes(stripTrailingSpaces(normalizeNewlines(headLine))),
+      clippedHead || normalizedOriginal.includes(stripTrailingSpaces(normalizeNewlines(headLine))),
       true,
-      `${row.tool}: 头部末行被切半: ${JSON.stringify(headLine.slice(0, 60))}`,
+      `${row.tool}: 头部末行被切半且没有截断标记: ${JSON.stringify(headLine.slice(0, 60))}`,
     );
     if (tailLine !== null && tailLine.length > 0) {
+      const clippedTail = tailLine.includes('[line clipped]');
+      if (clippedTail) clippedLines += 1;
       assert.equal(
-        normalizedOriginal.includes(stripTrailingSpaces(normalizeNewlines(tailLine))),
+        clippedTail || normalizedOriginal.includes(stripTrailingSpaces(normalizeNewlines(tailLine))),
         true,
         `${row.tool}: 尾部首行被切半: ${JSON.stringify(tailLine.slice(0, 60))}`,
       );
     }
   }
   assert.ok(checked > 300, `应有大量被裁剪样本，实际 ${checked}`);
-  console.log(`    elided results checked for line integrity: ${checked} (single-line blocks exempt: ${hardCut})`);
+  console.log(
+    `    elided results checked for line integrity: ${checked} ` +
+      `(single-line blocks exempt: ${hardCut}, budget-clipped first/last lines: ${clippedLines})`,
+  );
 });
 
 test('真实语料：图片等富内容块逐字节保留', { skip: !hasCorpus && '语料不存在' }, () => {

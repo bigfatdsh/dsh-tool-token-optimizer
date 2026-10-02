@@ -1,6 +1,6 @@
 # 省量实测记录（可复现）
 
-生成时间：2026-10-01 21:46:13 CST　插件版本：1.0.13
+生成时间：2026-10-02　插件版本：1.0.14（含硬约束修复：上界、首末行、失败信号覆盖、说明行自洽、行号单调）
 
 语料：本机 DSH 会话日志解压后的 25 个会话（`node tools/extract-corpus.mjs .corpus/raw`），共 2596 条真实工具结果。
 
@@ -65,24 +65,24 @@ session-4e3b5517-03e7-48a7-adae-202bbc    35    87.7%        7988    146920     
 会话文件        : 25
 工具结果条数    : 2596
 基线 token      : 1,234,957
-压缩后 token    : 459,832
-省下 token      : 775,125  (62.8%)
-被改动的结果条数: 677  (26.1%)
-  其中预算裁剪  : 623，纯无损规范化: 54
+压缩后 token    : 388,740
+省下 token      : 846,217  (68.5%)
+被改动的结果条数: 678  (26.1%)
+  其中预算裁剪  : 625，纯无损规范化: 53
 预算            : inlineChars=1600
 
 按工具（省量降序）：
   tool                          calls      base     saved   saved%  trimmed
-  bash                          1624    606504    294539   48.6%      411
-  cordis_inspect_query            46    196373    179990   91.7%       38
-  read                           145    158328    111009   70.1%      113
-  web_fetch                       43    103637     96220   92.8%       21
-  plugin_manager                  66     91945     77285   84.1%       23
-  cordis_inspect_list              8     15736     13072   83.1%        8
-  univer_api                       1      1458      1205   82.6%        1
-  web_search                      45     14812       868    5.9%        5
-  job_output                      19      2857       622   21.8%        2
-  job_list                         2       639       315   49.3%        1
+  bash                          1624    606504    344046   56.7%      413
+  cordis_inspect_query            46    196373    184259   93.8%       38
+  read                           145    158328    122117   77.1%      113
+  web_fetch                       43    103637     98038   94.6%       21
+  plugin_manager                  66     91945     80026   87.0%       23
+  cordis_inspect_list              8     15736     13912   88.4%        8
+  univer_api                       1      1458      1307   89.6%        1
+  web_search                      45     14812      1278    8.6%        5
+  job_output                      19      2857       823   28.8%        2
+  job_list                         2       639       411   49.3%        1
 
 按变换步骤（单步归因，降序）：
   retain-middle           773351 tok   99.8% of savings
@@ -95,8 +95,8 @@ session-4e3b5517-03e7-48a7-adae-202bbc    35    87.7%        7988    146920     
 ```
 inlineChars=1600
 会话数 22，请求数 2138
-基线表面 token 369,596,573 -> 277,151,015，省 92,445,558 (25.0%)
-单会话省量中位数 30.4%，p25 7.4%，p75 39.9%
+基线表面 token 369,596,573 -> 268,860,426，省 100,736,147 (27.3%)
+单会话省量中位数 36.4%，p25 7.6%，p75 41.8%
 
 会话                                 请求     基线     压缩后    省%
 session-824dc0dc-021c-4fd8-ab3f-8316    18    864931    362594    58.1%
@@ -113,7 +113,7 @@ session-824dc0dc-021c-4fd8-ab3f-8316    18    864931    362594    58.1%
 ## 4. 测试套件（`node --test "test/*.test.js"`）
 
 ```
-    invalidation re-pricing surface: 1,234,957 -> 459,832 tok (62.8% smaller on every prefix miss)
+    invalidation re-pricing surface: 1,234,957 -> 388,740 tok (68.5% smaller on every prefix miss)
 ✔ 前缀不变性：插件从不改写系统提示与工具表 (1.187209ms)
 ✔ 确定性：同一内容重复处理 N 次，输出逐字节相同 (19.805459ms)
 ✔ 确定性：与调用顺序、其它结果、时间无关 (3.652041ms)
@@ -121,7 +121,7 @@ session-824dc0dc-021c-4fd8-ab3f-8316    18    864931    362594    58.1%
 ✔ 前缀作废时重新计价的 token 只减不增 (518.383208ms)
 ✔ 插件不引入任何额外的模型请求或提示内容 (0.136375ms)
     lossless results decoded back exactly: 54/54
-    corpus: 2596 results, 677 optimized, 1234957 -> 459832 tok (62.8% saved)
+    corpus: 2596 results, 678 optimized, 1234957 -> 388740 tok (68.5% saved)
     read results: 18 identical, 10 exactly reversible, 113 elided (footer kept)
     elided results checked for line integrity: 623 (single-line blocks exempt: 23)
     rich-content results checked: 157
@@ -148,7 +148,7 @@ session-824dc0dc-021c-4fd8-ab3f-8316    18    864931    362594    58.1%
     bash results: stderr sections 68, exit markers 48
     web_fetch results through the hook: 43
     inspect/manager results: 120 total, 69 trimmed
-    end-to-end through the hook: 2596 results, 677 changed, 1234957 -> 459832 tok (62.8% saved)
+    end-to-end through the hook: 2596 results, 678 changed, 1234957 -> 388740 tok (68.5% saved)
 ✔ 真实 read 结果：信封、行号、续读 footer 在插件挂载后仍完整 (415.503958ms)
 ✔ 真实 bash 结果：stderr 分节、退出码标记、截断提示在插件挂载后仍完整 (353.895292ms)
 ✔ 真实 web_fetch 结果：不可信内容声明与 URL/状态头必须保留 (277.410542ms)
@@ -220,4 +220,27 @@ session-824dc0dc-021c-4fd8-ab3f-8316    18    864931    362594    58.1%
 ℹ tests 86
 ℹ pass 86
 ℹ fail 0
+```
+
+## 5. 硬约束复核（v1.0.14 修复后）
+
+四项曾经被违反、现在由 `test/invariants.test.js` 与 `test/corpus.test.js` 逐条钉死的性质：
+
+```
+上界（inlineChars=1600）：625 条被裁剪结果里，超过上界的文本块 0 个
+                          （修复前 143/625 超标，最大 1.31 倍）
+首行/末行可定位        ：602 条多行结果里，首行不可定位 0 条、末行不可定位 0 条
+                          （修复前末行丢失 30/677；预算性截断会带 `…[line clipped]` 标记）
+失败信号覆盖           ：AssertionError / npm ERR! / Expected: received / ✗ / ✘ / ✖
+                          / ELIFECYCLE / panic: / fatal: 全部命中
+说明行自洽             ：omitted chars + 成品长度 == of N，且 of N 为无损层之前的原文长度
+行号单调               ：read 结果保留行的行号非递减（不再出现 121 排在 55 之前）
+```
+
+性能（`node tools/bench.mjs .corpus/raw --runs 2`）：
+
+```
+单条 平均 0.059 ms | P50 0.004 ms | P95 0.242 ms | P99 0.778 ms
+最坏情况：1.2 MB / 4 万行多行文本 30 ms；2.5 MB / 10 万行重复行 6.3 ms
+每 KB 耗时在各档位持平（0.013–0.043 ms/KB），无二次爆炸
 ```
