@@ -343,6 +343,21 @@ dsh plugin install link:/绝对路径/dsh-tool-token-optimizer
 代价是**更多结果被裁剪**：模型需要重跑命令才能看到被省略的中段。默认保持 1600，是因为
 "质量不变"的证据只覆盖这个取值；要更省就显式下发 `toolBudgets` 并接受该取舍。
 
+### 2026-10-28 复测（本机 5689 条真实结果，含 MCP 工具）
+
+同一份语料、同一段策略，只改 `toolBudgets`（`node tools/replay.mjs .corpus/raw --budgets bash=1000`）：
+
+| 配置 | 压缩后 token | 省量 | 被裁剪条数 |
+|---|---:|---:|---:|
+| 默认（全工具 1600） | 760,295 | 21.7% | 222 |
+| `{ bash: 1200 }` | 708,314 | 27.0% | 567 |
+| `{ bash: 1000 }` | 664,150 | **31.6%** | 857 |
+| `{ bash: 800 }` | 567,229 | **41.6%** | 1,535 |
+
+本机 bash 占工具结果 token 的 71%，而且结果可以用同一条命令重跑，所以它值得比 `read`
+更紧的预算。当前 desktop profile 采用 `{ bash: 1000 }`：在默认之上再省约 10 个百分点，
+只多裁 11% 的结果；`{ bash: 800 }` 更激进，会裁掉 27% 的 bash 结果。
+
 只读统计面：`ctx.toolTokenOptimizerStats.snapshot()`
 → `{ calls, optimized, tokensBefore, tokensAfter, elided, lossless }`。
 

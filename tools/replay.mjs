@@ -28,6 +28,14 @@ const flag = (name, fallback) => {
 const perStep = args.includes('--step');
 const topN = Number(flag('--top', 5));
 const inlineChars = Number(flag('--inline', 1600));
+/** `--budgets bash=1000,read=2400` → `{ bash: 1000, read: 2400 }`。 */
+const toolBudgets = Object.fromEntries(
+  String(flag('--budgets', ''))
+    .split(',')
+    .map((pair) => pair.split('='))
+    .filter(([tool, value]) => tool && Number.isFinite(Number(value)))
+    .map(([tool, value]) => [tool.trim(), Number(value)]),
+);
 
 const policy = {
   inlineChars,
@@ -36,7 +44,7 @@ const policy = {
   tailRatio: 0.35,
   minTailChars: 300,
   importantBudgetChars: Math.max(400, Math.floor(inlineChars * 0.4)),
-  toolBudgets: {},
+  toolBudgets,
   minBlockChars: 400,
 };
 
