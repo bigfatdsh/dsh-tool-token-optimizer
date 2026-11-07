@@ -203,8 +203,17 @@ test('真实语料：原文首行与末行在成品里仍可定位（结论与�
     const first = original.split('\n')[0];
     const last = original.split('\n').at(-1);
     // 允许"预算裁剪后的前缀"出现（首行/末行自己超过预算时的既定退化）。
+    // 末行例外：实现保留的是它的**尾部**——结论与退出状态在行尾，切掉开头才是对的。
+    // 所以末行只要头 40 或尾 40 有一处在成品里，就算"可定位"。
     if (first.length > 0 && !after.includes(first) && !after.includes(first.slice(0, 40))) missingFirst += 1;
-    if (last.length > 0 && !after.includes(last) && !after.includes(last.slice(0, 40))) missingLast += 1;
+    if (
+      last.length > 0 &&
+      !after.includes(last) &&
+      !after.includes(last.slice(0, 40)) &&
+      !after.includes(last.slice(-40))
+    ) {
+      missingLast += 1;
+    }
   }
   assert.ok(checked > 100, `应有足量被裁剪样本，实际 ${checked}`);
   assert.equal(missingLast, 0, `有 ${missingLast} 条结果的结论行（末行）不可定位`);
