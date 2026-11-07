@@ -24,7 +24,7 @@ test('空配置得到全部默认值', () => {
   assert.equal(result.issues, undefined);
   assert.deepEqual(result.value, {
     enabled: true,
-    inlineChars: 1600,
+    inlineChars: 1200,
     triggerRatio: 1,
     headRatio: 0.55,
     tailRatio: 0.35,

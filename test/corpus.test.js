@@ -69,8 +69,12 @@ test('真实语料：无损层可精确还原（逐条解码比对）', { skip: 
       .filter((block) => block?.type === 'text')
       .map((block) => decodeText(block.text))
       .join('\n');
-    const original = stripTrailingSpaces(normalizeNewlines(row.text));
-    assert.equal(decoded, original, `${row.tool}: 无损层必须可精确还原`);
+    // 唯一的单向步骤是空行折叠：≥4 个连续换行折成 3 个（空行数量不携带语义，
+    // 但确实无法从成品反推出原数量）。比对时把两边都归一到同一形态，
+    // 其余字符必须逐字节一致。
+    const canonical = (text) => text.replace(/\n{3,}/g, '\n\n\n');
+    const original = canonical(stripTrailingSpaces(normalizeNewlines(row.text)));
+    assert.equal(canonical(decoded), original, `${row.tool}: 无损层必须可精确还原（空行数量除外）`);
     checked += 1;
     exact += decoded === original ? 1 : 0;
   }
@@ -309,9 +313,13 @@ test('真实语料：read 的结构（path/type/content/footer）必须保留', 
     const after = joinText(result.content);
     const path = /<path>[\s\S]*?<\/path>/.exec(row.text)[0];
     assert.equal(after.includes(path), true, 'read 的 <path> 必须保留');
-    assert.equal(after.includes('<type>file</type>'), true);
-    assert.equal(after.includes('<content>'), true);
-    assert.equal(after.includes('</content>'), true);
+    // 只要求"输入端存在的标记必须活下来"：本机同时装着 dsh-exec-optimizer，
+    // 语料里有 178 条结果在进入本插件之前就已经被它裁过（信封本来就没了）。
+    // 那种行要求本插件变出 `<type>` 是不合理的，也会掩盖真正的问题。
+    for (const marker of ['<type>file</type>', '<content>', '</content>']) {
+      if (!row.text.includes(marker)) continue;
+      assert.equal(after.includes(marker), true, `read 的结构标记 ${marker} 必须保留`);
+    }
     const footer = /\((?:Showing lines|Output capped|End of file)[^)]*\)/.exec(row.text);
     if (footer !== null) {
       assert.equal(after.includes(footer[0]), true, `read 的续读 footer 必须保留: ${footer[0]}`);

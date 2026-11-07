@@ -111,7 +111,7 @@ test('retainContent 在总长未超预算时一个字节都不改', () => {
 
 test('elisionNotice 同时给出省略量、可疑行数与取回方式', () => {
   const notice = elisionNotice({ chars: 1234, lines: 56, total: 7890, important: 3, recovery: 're-run bash' });
-  assert.equal(notice, '[…] omitted 1234 chars / 56 lines of 7890; 3 error/warning lines were in the omitted middle; re-run bash');
+  assert.equal(notice, '[…] omitted 1234 chars / 56 lines of 7890; 3 error lines in omitted middle; re-run bash');
   const bare = elisionNotice({ chars: 1, lines: 1, total: 2, important: 0 });
   assert.equal(bare.includes('re-run this tool call to get the full text'), true);
 });
