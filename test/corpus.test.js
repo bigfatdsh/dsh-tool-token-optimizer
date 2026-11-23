@@ -189,7 +189,8 @@ test('真实语料：被裁剪的结果绝不切进行中间（保留部分都�
     // 也会把裸 `\r`（终端覆盖写）规范化，拿原始字节比对必然误报。
     const lossless = compactText(row.text, { enableJsonBreak: false });
     const normalizedOriginal = lossless.changed ? lossless.text : stripTrailingSpaces(normalizeNewlines(row.text));
-    const clippedHead = headLine.includes('[line clipped]');
+    const clippedHead =
+      headLine.includes('[line clipped]') || headLine.includes('⟨…+') || headLine.includes('⟨+');
     if (clippedHead) clippedLines += 1;
     assert.equal(
       clippedHead || normalizedOriginal.includes(stripTrailingSpaces(normalizeNewlines(headLine))),
@@ -197,7 +198,7 @@ test('真实语料：被裁剪的结果绝不切进行中间（保留部分都�
       `${row.tool}: 头部末行被切半且没有截断标记: ${JSON.stringify(headLine.slice(0, 60))}`,
     );
     if (tailLine !== null && tailLine.length > 0) {
-      const clippedTail = tailLine.includes('[line clipped]');
+      const clippedTail = tailLine.includes('[line clipped]') || tailLine.includes('⟨+') || tailLine.includes('⟨…+');
       if (clippedTail) clippedLines += 1;
       assert.equal(
         clippedTail || normalizedOriginal.includes(stripTrailingSpaces(normalizeNewlines(tailLine))),
@@ -261,7 +262,7 @@ test('真实语料：可疑行要么原样保留，要么被精确计数说明',
   let worst = { tool: '', dropped: 0, chars: 0 };
   for (const row of rows) {
     if (row.isError || row.text.length === 0) continue;
-    const before = importantLines(row.text);
+    const before = importantLines(joinText(row.content) || row.text);
     if (before.size === 0) continue;
     const result = optimizeResult({ tool: row.tool, content: row.content, isError: row.isError }, OPTIONS);
     const afterText = joinText(result.content);

@@ -92,7 +92,7 @@ test('真实 bash 结果：stderr 分节、退出码标记、截断提示在插�
         assert.match(out.text, /\[…\] omitted \d+ chars \/ \d+ lines/);
       }
     }
-    if (row.text.includes('[exit code:')) {
+    if (/^\[exit code: -?\d+\]$/m.test(row.text)) {
       withExit += 1;
       // 非零退出标记在尾部，通常被尾部预算保住；万一落在被省略的中段，
       // 说明行必须显式写出被省略的行数（模型据此判断要不要取回）。

@@ -28,4 +28,8 @@
         #   toolBudgets: { read: 4000 }
         toolBudgets: {}
         logSavings: false
+        # 可恢复性：把被裁掉的中段落成文件，说明行给出可直接 read 的路径。
+        recovery: spill
+        recoveryTtlHours: 168
+        recoveryMaxMB: 200
         # 其它可用键：triggerRatio / minTailChars / skipTools

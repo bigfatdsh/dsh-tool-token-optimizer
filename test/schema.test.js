@@ -33,6 +33,10 @@ test('空配置得到全部默认值', () => {
     toolBudgets: {},
     skipTools: [],
     logSavings: false,
+    recovery: 'hint',
+    recoveryDir: '',
+    recoveryTtlHours: 168,
+    recoveryMaxMB: 200,
   });
 });
 
